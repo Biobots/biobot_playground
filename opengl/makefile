@@ -11,7 +11,7 @@ EXECUTABLE	:= main
 all:./$(EXECUTABLE)
 
 run: all
-    ./$(EXECUTABLE)
+	./$(EXECUTABLE)
 
 $(EXECUTABLE):$(SRC)/*.cpp
-    $(CXX) $(CXX_FLAGS) -I$(INCLUDE) -L$(LIB) $^ -o $@ $(LIBRARIES)
+	$(CXX) $(CXX_FLAGS) -I$(INCLUDE) -L$(LIB) $^ -o $@ $(LIBRARIES)
