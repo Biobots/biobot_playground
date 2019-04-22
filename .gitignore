@@ -1,3 +1,11 @@
 nlp/nltk/__pycache__/
 .vscode/
 opengl/main.exe
+prototype/automata/Temp
+prototype/automata/.vs
+prototype/automata/obj
+prototype/automata/Logs
+prototype/automata/Library/cache
+prototype/automata/Library/PackageCache
+prototype/automata/Library/ShaderCache
+prototype/automata/Library/StateCache
