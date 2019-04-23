@@ -6,9 +6,14 @@
     const unsigned int SCR_WIDTH = 800;
     const unsigned int SCR_HEIGHT = 600;
     float vertices[] = {
-    -0.5f, -0.5f, 0.0f,
-     0.5f, -0.5f, 0.0f,
-     0.0f,  0.5f, 0.0f
+        0.5f, 0.5f, 0.0f,
+        0.5f, -0.5f, 0.0f,
+        -0.5f, -0.5f, 0.0f,
+        -0.5f,  0.5f, 0.0f
+     };
+     unsigned int indices[] = {
+         0, 1, 3,
+         1, 2, 3
      };
     int main()
     {
@@ -39,17 +44,22 @@
             return -1;
         }
 
-        unsigned int VBO;
+        unsigned int VBO, VAO, EBO;
+
+        glGenVertexArrays(1, &VAO);
+        glBindVertexArray(VAO);
+
         glGenBuffers(1, &VBO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-        unsigned int VAO;
-        glGenVertexArrays(1, &VAO);
-        glBindVertexArray(VAO);
+        glGenBuffers(1, &EBO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
         
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
+
 
         Shader shader("src\\shaders\\test.vs", "src\\shaders\\test.fs");
 
@@ -57,12 +67,13 @@
         // -----------
         while (!glfwWindowShouldClose(window))
         {
-            glClearColor(0.0f, 1.f, 0.0f,1.0f);
+            glClearColor(0.0f, 1.f, 1.0f,1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
             shader.use();
             glBindVertexArray(VAO);
             glBindBuffer(GL_ARRAY_BUFFER, VBO);
-            glDrawArrays(GL_TRIANGLES, 0, 3);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
             // glfw: swap buffers and poll IO events (keyspressed/released, mouse moved etc.)
             // ---------------------------------------------------
             glfwSwapBuffers(window);
