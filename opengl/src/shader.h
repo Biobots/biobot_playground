@@ -7,20 +7,22 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <glm/glm.hpp>
 
 class Shader {
 public:
-	//³ÌÐòID
+	//ï¿½ï¿½ï¿½ï¿½ID
 	unsigned int ID;
 
 	Shader(const GLchar* vertexPath, const GLchar* fragmentPath);
-	//Ê¹ÓÃ×ÅÉ«Æ÷
+	//Ê¹ï¿½ï¿½ï¿½ï¿½É«ï¿½ï¿½
 	void use();
-	//ÉèÖÃuniform±äÁ¿
+	//ï¿½ï¿½ï¿½ï¿½uniformï¿½ï¿½ï¿½ï¿½
 	void setBool(const std::string& name, bool value) const;
 	void setInt(const std::string& name, int value) const;
 	void setFloat(const std::string& name, float value) const;
 	void setMat4(const std::string& name, float value[]) const;
+	void setVec4(const std::string& name, glm::vec4 value) const;
 };
 
 #endif

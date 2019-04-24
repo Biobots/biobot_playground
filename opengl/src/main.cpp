@@ -12,10 +12,15 @@
         -0.5f, -0.5f, 0.0f,
         -0.5f,  0.5f, 0.0f
      };
-     unsigned int indices[] = {
-         0, 1, 3,
-         1, 2, 3
-     };
+    unsigned int indices[] = {
+        0, 1, 3,
+        1, 2, 3
+    };
+    float texCoords[] = {
+        0.0f, 0.0f,
+        1.0f, 0.0f,
+        05.f, 1.0f
+    };
     int main()
     {
         // glfw: initialize and configure
@@ -71,6 +76,9 @@
             glClearColor(0.0f, 1.f, 1.0f,1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
             shader.use();
+            float timeValue = glfwGetTime();
+            float greenValue = sin(timeValue * 10) / 2.0f + 0.5f;
+            shader.setVec4("UserColor", glm::vec4(1.0f, greenValue, 0.0f, 1.0f));
             glBindVertexArray(VAO);
             glBindBuffer(GL_ARRAY_BUFFER, VBO);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
