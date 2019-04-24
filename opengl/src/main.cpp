@@ -1,6 +1,7 @@
     #include <glad/glad.h>
     #include <GLFW/glfw3.h>
     #include <iostream>
+    #include <glm/glm.hpp>
     #include "shader.h"
     // settings
     const unsigned int SCR_WIDTH = 800;
