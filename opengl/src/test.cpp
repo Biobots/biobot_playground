@@ -266,6 +266,7 @@ void test3Loop()
     cubeShader->setMat4("projection", glm::value_ptr(projection));
     cubeShader->setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
     cubeShader->setVec3("lightPos", glm::vec3(0.0f, 0.0f, 0.5f));
+    cubeShader->setVec3("viewPos", glm::vec3(0.0f, 0.0f, 0.0f));
     glBindVertexArray(VAO3);
     glBindTexture(GL_TEXTURE_2D, cubeTexture);
     for (int i = 0; i < sizeof(cubePositions) / sizeof(cubePositions[0]); i++)
