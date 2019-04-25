@@ -7,10 +7,6 @@
 #include "shader.h"
 #include "test.h"
 
-// settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
-
 
 int main()
 {
@@ -40,17 +36,18 @@ int main()
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
+    glEnable(GL_DEPTH_TEST); 
 
-    test1Initialize();
+    test3Initialize();
     
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
     {
         glClearColor(0.0f, 1.f, 1.0f,1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        test1Loop();
+        test3Loop();
 
         // glfw: swap buffers and poll IO events (keyspressed/released, mouse moved etc.)
         // ---------------------------------------------------
