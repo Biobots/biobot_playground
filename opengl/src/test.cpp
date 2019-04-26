@@ -99,7 +99,7 @@ void test1Loop()
 }
 
 //test2 transform
-glm::mat4 model, view, projection;
+glm::mat4 model, projection;
 Shader* tranShader;
 unsigned transTexture, VAO2, VBO2, EBO2;
 void test2Initialize()
@@ -258,8 +258,8 @@ void test3Initialize()
 void test3Loop()
 {
     cubeShader->use();
-    view = glm::mat4(1.0f);
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+    //view = glm::mat4(1.0f);
+    //view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
     projection = glm::mat4(1.0f);
     projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
     cubeShader->setMat4("view", glm::value_ptr(view));

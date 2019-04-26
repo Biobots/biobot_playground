@@ -7,6 +7,37 @@
 #include "shader.h"
 #include "test.h"
 
+glm::mat4 view;
+glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f,  3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);
+float deltaTime = 0.0f;
+float preFrame = 0.0f;
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+    glViewport(0, 0, width, height);
+}
+void processInput(GLFWwindow *window)
+{
+    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    {
+        glfwSetWindowShouldClose(window, true);
+    }
+    float cameraSpeed = 2.5f * deltaTime;
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        cameraPos += cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        cameraPos -= cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+}
+void mouseInput(GLFWwindow* window, double xPos, double yPos)
+{
+
+}
 
 int main()
 {
@@ -29,6 +60,9 @@ int main()
         return -1;
     }
     glfwMakeContextCurrent(window);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetCursorPosCallback(window, mouseInput);
     // glad: load all OpenGL function pointers
     // ---------------------------------------
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -44,13 +78,18 @@ int main()
     // -----------
     while (!glfwWindowShouldClose(window))
     {
-        glClearColor(0.0f, 1.f, 1.0f,1.0f);
+        glClearColor(0.5f, 0.5f, 0.5f,1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         test3Loop();
-
+        
         // glfw: swap buffers and poll IO events (keyspressed/released, mouse moved etc.)
         // ---------------------------------------------------
+        float curFrame = glfwGetTime();
+        deltaTime = curFrame - preFrame;
+        preFrame = curFrame;
+        processInput(window);
+        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }

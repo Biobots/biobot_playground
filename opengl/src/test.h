@@ -9,6 +9,8 @@
 extern const unsigned int SCR_WIDTH;
 extern const unsigned int SCR_HEIGHT;
 
+extern glm::mat4 view;
+
 void test1Initialize();
 void test1Loop();
 
