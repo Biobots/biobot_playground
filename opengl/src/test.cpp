@@ -99,7 +99,7 @@ void test1Loop()
 }
 
 //test2 transform
-glm::mat4 model, projection;
+glm::mat4 model;
 Shader* tranShader;
 unsigned transTexture, VAO2, VBO2, EBO2;
 void test2Initialize()
@@ -253,6 +253,7 @@ void test3Initialize()
     glEnableVertexAttribArray(2);
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 }
 
 void test3Loop()
@@ -260,8 +261,8 @@ void test3Loop()
     cubeShader->use();
     //view = glm::mat4(1.0f);
     //view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-    projection = glm::mat4(1.0f);
-    projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+    //projection = glm::mat4(1.0f);
+    //projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
     cubeShader->setMat4("view", glm::value_ptr(view));
     cubeShader->setMat4("projection", glm::value_ptr(projection));
     cubeShader->setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));

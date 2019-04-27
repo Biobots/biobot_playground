@@ -7,12 +7,15 @@
 #include "shader.h"
 #include "test.h"
 
-glm::mat4 view;
+glm::mat4 view, projection;
 glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f,  3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);
 float deltaTime = 0.0f;
 float preFrame = 0.0f;
+
+float yaw, pitch;
+float fov = 45.0f;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -36,7 +39,58 @@ void processInput(GLFWwindow *window)
 }
 void mouseInput(GLFWwindow* window, double xPos, double yPos)
 {
+    static float xLast = 400;
+    static float yLast = 300;
+    static bool firstRun = true;
+    //printf("%d, xLast:%f, yLast:%f. xPos:%f, yPos:%f", firstRun, xLast, yLast, xPos, yPos);;
+    if(firstRun)
+    {
+        xLast = xPos;
+        yLast = yPos;
+        firstRun = false;
+    }
+    //printf("%d, xLast:%f, yLast:%f. xPos:%f, yPos:%f", firstRun, xLast, yLast, xPos, yPos);;
 
+    float dx = xPos - xLast;
+    float dy = yLast - yPos; //reverse
+    xLast = xPos;
+    yLast = yPos;
+
+    float sensitivity = 0.05f;
+    dx *= sensitivity;
+    dy *= sensitivity;
+
+    yaw += dx;
+    pitch += dy;
+    pitch = (pitch > 89.0f ? 89.0f : pitch);
+    pitch = (pitch < -89.0f ? -89.0f : pitch);
+    /*yaw = (yaw > 89.0f ? 89.0f : yaw);
+    yaw = (yaw < -89.0f ? -89.0f : yaw);*/
+
+    glm::vec3 front;
+    
+    //when initial cameraFront matrix is (0, 0, -1)
+    front.x = cos(glm::radians(pitch)) * sin(glm::radians(yaw));
+    front.y = sin(glm::radians(pitch));
+    front.z = -1 * cos(glm::radians(pitch)) * cos(glm::radians(yaw));
+
+    //when initial cameraFront matrix is (1, 0, 0)
+    //front.x = cos(glm::radians(pitch)) * sin(glm::radians(yaw));
+    //front.y = sin(glm::radians(pitch));
+    //front.z = -1 * cos(glm::radians(pitch)) * cos(glm::radians(yaw));
+
+
+    cameraFront = glm::normalize(front);
+}
+
+void scrollInput(GLFWwindow* window, double dx, double dy)
+{
+    if (fov >= 1.0f && fov <= 45.0f)
+    { fov -= dy;}
+    if (fov <= 1.0f){fov = 1.0f;}
+    if (fov >= 45.0f){fov = 45.0f;}
+
+    projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH/(float)SCR_HEIGHT, 0.1f, 100.0f);
 }
 
 int main()
@@ -63,6 +117,7 @@ int main()
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, mouseInput);
+    glfwSetScrollCallback(window, scrollInput);
     // glad: load all OpenGL function pointers
     // ---------------------------------------
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -90,6 +145,7 @@ int main()
         preFrame = curFrame;
         processInput(window);
         view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        printf("front:%f, %f, %f\n", cameraFront.x, cameraFront.y, cameraFront.z);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
