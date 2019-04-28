@@ -329,13 +329,13 @@ void test4Loop()
     materialShader->setMat4("projection", glm::value_ptr(mainCamera.projection));
     materialShader->setVec3("viewPos", mainCamera.position);
     materialShader->setVec3("light.position", glm::vec3(0.0f, 0.0f, 5.0f));
-    materialShader->setVec3("light.ambient", glm::vec3(0.5f, 0.5f, 0.5f));
+    materialShader->setVec3("light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
     materialShader->setVec3("light.diffuse", glm::vec3(0.3f, 0.3f, 0.3f));
     materialShader->setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-    materialShader->setVec3("material.ambient",  glm::vec3(0.5f, 0.5f, 0.3f));
-    materialShader->setVec3("material.diffuse",  glm::vec3(0.5f, 0.5f, 0.3f));
+    materialShader->setVec3("material.ambient",  glm::vec3(0.3f, 0.5f, 0.7f));
+    materialShader->setVec3("material.diffuse",  glm::vec3(0.3f, 0.5f, 0.7f));
     materialShader->setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
-    materialShader->setFloat("material.shininess", 32.0f);
+    materialShader->setFloat("material.shininess", 128.0f);
     glBindVertexArray(VAO4);
     glBindTexture(GL_TEXTURE_2D, cubeTexture);
     for (int i = 0; i < sizeof(cubePositions) / sizeof(cubePositions[0]); i++)
@@ -345,6 +345,75 @@ void test4Loop()
         float angle = 20.0f * cos(i);
         model = glm::rotate(model, (float)glfwGetTime() * glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
         materialShader->setMat4("model", glm::value_ptr(model));
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
+}
+
+
+Shader* lightmapShader;
+unsigned int VAO5, VBO5;
+unsigned int mapTexture;
+void test5Initialize()
+{
+    static Shader lightmaptmp("src\\shaders\\cubeshader.vs", "src\\shaders\\lightmapshader.fs");
+    lightmapShader = &lightmaptmp;
+
+    glActiveTexture(GL_TEXTURE0);
+    glGenTextures(1, &mapTexture);
+    glBindTexture(GL_TEXTURE_2D, mapTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    data = stbi_load("1.jpg", &width, &height, &nrChannels, 0); 
+    if (data) 
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        stbi_image_free(data);
+        printf("texture load success");
+    }
+
+    glGenVertexArrays(1, &VAO5);
+    glBindVertexArray(VAO5);
+
+    glGenBuffers(1, &VBO5);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO5);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cube), cube, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    printf("initialization success\n");
+}
+
+void test5Loop()
+{
+    lightmapShader->use();
+    mainCamera.updateMatrix();
+    lightmapShader->setMat4("view", glm::value_ptr(mainCamera.view));
+    lightmapShader->setMat4("projection", glm::value_ptr(mainCamera.projection));
+    lightmapShader->setVec3("viewPos", mainCamera.position);
+    lightmapShader->setVec3("light.position", glm::vec3(0.0f, 0.0f, 5.0f));
+    lightmapShader->setVec3("light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
+    lightmapShader->setVec3("light.diffuse", glm::vec3(0.3f, 0.3f, 0.3f));
+    lightmapShader->setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+    lightmapShader->setInt("material.diffuse", 0);
+    lightmapShader->setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+    lightmapShader->setFloat("material.shininess", 128.0f);
+    glBindVertexArray(VAO5);
+    glBindTexture(GL_TEXTURE_2D, mapTexture);
+    for (int i = 0; i < sizeof(cubePositions) / sizeof(cubePositions[0]); i++)
+    {
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, cubePositions[i]);
+        float angle = 20.0f * cos(i);
+        model = glm::rotate(model, (float)glfwGetTime() * glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+        lightmapShader->setMat4("model", glm::value_ptr(model));
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 }
