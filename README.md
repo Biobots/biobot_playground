@@ -1,16 +1,16 @@
 # biobot_playground
 
-everything
-
 1. [openGL Learning](https://github.com/Biobots/biobot_playground/tree/master/opengl)
 
     - [x] Shader manager
     - [x] 3D transform
-    - [ ] Camera manager
+    - [x] Camera manager
       - [x] Camera control
-      - [ ] Camera class
-    - [ ] Lighting
+      - [x] Camera class
+        - [ ] TODO: fix Euler angle
+    - [ ] Basic lighting
       - [x] Ambient lighting
       - [x] Diffuse lighting
-      - [ ] Specular lighting
+      - [x] Specular lighting
+    - [ ] Material
     - [ ] Mesh

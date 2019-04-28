@@ -263,10 +263,12 @@ void test3Loop()
     //view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
     //projection = glm::mat4(1.0f);
     //projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-    cubeShader->setMat4("view", glm::value_ptr(view));
-    cubeShader->setMat4("projection", glm::value_ptr(projection));
+    mainCamera.updateMatrix();
+    cubeShader->setMat4("view", glm::value_ptr(mainCamera.view));
+    cubeShader->setMat4("projection", glm::value_ptr(mainCamera.projection));
+    cubeShader->setVec3("viewPos", mainCamera.position);
     cubeShader->setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-    cubeShader->setVec3("lightPos", glm::vec3(0.0f, 0.0f, 0.5f));
+    cubeShader->setVec3("lightPos", glm::vec3(0.0f, 0.0f, 5.0f));
     cubeShader->setVec3("viewPos", glm::vec3(0.0f, 0.0f, 0.0f));
     glBindVertexArray(VAO3);
     glBindTexture(GL_TEXTURE_2D, cubeTexture);

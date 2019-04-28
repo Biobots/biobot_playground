@@ -1,3 +1,6 @@
+#ifndef TEST_H
+#define TEST_H
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -5,12 +8,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "shader.h"
+#include "camera.h"
 
-extern const unsigned int SCR_WIDTH;
-extern const unsigned int SCR_HEIGHT;
 
 extern glm::mat4 view;
 extern glm::mat4 projection;
+extern Camera mainCamera;
 
 void test1Initialize();
 void test1Loop();
@@ -20,3 +23,6 @@ void test2Loop();
 
 void test3Initialize();
 void test3Loop();
+
+
+#endif
