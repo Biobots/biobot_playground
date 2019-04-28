@@ -45,7 +45,7 @@ Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath)
 	if (!success)
 	{
 		glGetShaderInfoLog(vertex, 512, NULL, infoLog);
-		std::cout << "顶点着色器编译失败" << infoLog << std::endl;
+		std::cout << "vs fail!" << infoLog << std::endl;
 	}
 
 	fragment = glCreateShader(GL_FRAGMENT_SHADER);
@@ -55,7 +55,7 @@ Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath)
 	if (!success)
 	{
 		glGetShaderInfoLog(fragment, 512, NULL, infoLog);
-		std::cout << "片元着色器编译失败" << infoLog << std::endl;
+		std::cout << "fs fail!" << infoLog << std::endl;
 	}
 
 	ID = glCreateProgram();
@@ -66,7 +66,7 @@ Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath)
 	if (!success)
 	{
 		glGetProgramInfoLog(ID, 512, NULL, infoLog);
-		std::cout << "链接失败" << infoLog << std::endl;
+		std::cout << "compile glsl fail" << infoLog << std::endl;
 	}
 	glDeleteShader(vertex);
 	glDeleteShader(fragment);
@@ -87,7 +87,7 @@ void Shader::setInt(const std::string& name, int value) const
 }
 void Shader::setFloat(const std::string& name, float value) const
 {
-	glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
+	glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
 }
 void Shader::setMat4(const std::string& name, float value[]) const 
 {

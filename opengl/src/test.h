@@ -24,5 +24,7 @@ void test2Loop();
 void test3Initialize();
 void test3Loop();
 
+void test4Initialize();
+void test4Loop();
 
 #endif

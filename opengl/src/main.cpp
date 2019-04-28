@@ -20,6 +20,9 @@ float fov = 45.0f;
 
 Camera mainCamera(glm::vec3(0.0f, 0.0f, 3.0f));
 
+void(*initFunc)() = test4Initialize;
+void(*loopFunc)() = test4Loop;
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
@@ -76,7 +79,7 @@ int main()
     }
     glEnable(GL_DEPTH_TEST); 
 
-    test3Initialize();
+    initFunc();
     
     // render loop
     // -----------
@@ -85,7 +88,7 @@ int main()
         glClearColor(0.5f, 0.5f, 0.5f,1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        test3Loop();
+        loopFunc();
         
         // glfw: swap buffers and poll IO events (keyspressed/released, mouse moved etc.)
         // ---------------------------------------------------

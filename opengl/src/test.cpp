@@ -269,7 +269,6 @@ void test3Loop()
     cubeShader->setVec3("viewPos", mainCamera.position);
     cubeShader->setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
     cubeShader->setVec3("lightPos", glm::vec3(0.0f, 0.0f, 5.0f));
-    cubeShader->setVec3("viewPos", glm::vec3(0.0f, 0.0f, 0.0f));
     glBindVertexArray(VAO3);
     glBindTexture(GL_TEXTURE_2D, cubeTexture);
     for (int i = 0; i < sizeof(cubePositions) / sizeof(cubePositions[0]); i++)
@@ -279,6 +278,73 @@ void test3Loop()
         float angle = 20.0f * cos(i);
         model = glm::rotate(model, (float)glfwGetTime() * glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
         cubeShader->setMat4("model", glm::value_ptr(model));
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
+}
+
+Shader* materialShader;
+unsigned int VAO4, VBO4;
+void test4Initialize()
+{
+    static Shader materialtmp("src\\shaders\\cubeshader.vs", "src\\shaders\\materialshader.fs");
+    materialShader = &materialtmp;
+
+    glGenTextures(1, &cubeTexture);
+    glBindTexture(GL_TEXTURE_2D, cubeTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    data = stbi_load("wall.jpg", &width, &height, &nrChannels, 0); 
+    if (data) 
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        stbi_image_free(data);
+        printf("texture load success");
+    }
+
+    glGenVertexArrays(1, &VAO4);
+    glBindVertexArray(VAO4);
+
+    glGenBuffers(1, &VBO4);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO4);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cube), cube, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    printf("initialization success\n");
+}
+
+void test4Loop()
+{
+    materialShader->use();
+    mainCamera.updateMatrix();
+    materialShader->setMat4("view", glm::value_ptr(mainCamera.view));
+    materialShader->setMat4("projection", glm::value_ptr(mainCamera.projection));
+    materialShader->setVec3("viewPos", mainCamera.position);
+    materialShader->setVec3("light.position", glm::vec3(0.0f, 0.0f, 5.0f));
+    materialShader->setVec3("light.ambient", glm::vec3(0.5f, 0.5f, 0.5f));
+    materialShader->setVec3("light.diffuse", glm::vec3(0.3f, 0.3f, 0.3f));
+    materialShader->setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+    materialShader->setVec3("material.ambient",  glm::vec3(0.5f, 0.5f, 0.3f));
+    materialShader->setVec3("material.diffuse",  glm::vec3(0.5f, 0.5f, 0.3f));
+    materialShader->setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+    materialShader->setFloat("material.shininess", 32.0f);
+    glBindVertexArray(VAO4);
+    glBindTexture(GL_TEXTURE_2D, cubeTexture);
+    for (int i = 0; i < sizeof(cubePositions) / sizeof(cubePositions[0]); i++)
+    {
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, cubePositions[i]);
+        float angle = 20.0f * cos(i);
+        model = glm::rotate(model, (float)glfwGetTime() * glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+        materialShader->setMat4("model", glm::value_ptr(model));
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 }

@@ -8,9 +8,13 @@
       - [x] Camera control
       - [x] Camera class
         - [ ] TODO: fix Euler angle
-    - [ ] Basic lighting
+    - [x] Basic lighting
       - [x] Ambient lighting
       - [x] Diffuse lighting
       - [x] Specular lighting
     - [ ] Material
+      - [x] Light properties
+      - [ ] Lighting maps
+        - [ ] Diffuse maps
+        - [ ] Specular maps
     - [ ] Mesh
