@@ -352,26 +352,42 @@ void test4Loop()
 
 Shader* lightmapShader;
 unsigned int VAO5, VBO5;
+int width1, height1, nrChannels1;
+unsigned char *data1;
 unsigned int mapTexture;
+int width2, height2, nrChannels2;
+unsigned char *data2;
+unsigned int specularTexture;
 void test5Initialize()
 {
     static Shader lightmaptmp("src\\shaders\\cubeshader.vs", "src\\shaders\\lightmapshader.fs");
     lightmapShader = &lightmaptmp;
 
-    glActiveTexture(GL_TEXTURE0);
-    glGenTextures(1, &mapTexture);
-    glBindTexture(GL_TEXTURE_2D, mapTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    data = stbi_load("container.png", &width, &height, &nrChannels, 0); 
-    if (data) 
+
+    glGenTextures(1, &mapTexture);
+    glBindTexture(GL_TEXTURE_2D, mapTexture);
+    data1 = stbi_load("container.png", &width1, &height1, &nrChannels1, 0); 
+    if (data1) 
     {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data); //png use rgba!
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width1, height1, 0, GL_RGBA, GL_UNSIGNED_BYTE, data1); //png use rgba!
         glGenerateMipmap(GL_TEXTURE_2D);
-        stbi_image_free(data);
-        printf("texture load success");
+        stbi_image_free(data1);
+        printf("texture1 load success\n");
+    }
+
+    glGenTextures(1, &specularTexture);
+    glBindTexture(GL_TEXTURE_2D, specularTexture);
+    data2 = stbi_load("container_specular.png", &width2, &height2, &nrChannels2, 0); 
+    if (data2) 
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width2, height2, 0, GL_RGBA, GL_UNSIGNED_BYTE, data2); //png use rgba!
+        glGenerateMipmap(GL_TEXTURE_2D);
+        stbi_image_free(data2);
+        printf("texture2 load success\n");
     }
 
     glGenVertexArrays(1, &VAO5);
@@ -403,10 +419,13 @@ void test5Loop()
     lightmapShader->setVec3("light.diffuse", glm::vec3(0.3f, 0.3f, 0.3f));
     lightmapShader->setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
     lightmapShader->setInt("material.diffuse", 0);
-    lightmapShader->setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+    lightmapShader->setInt("material.specular", 1);
     lightmapShader->setFloat("material.shininess", 128.0f);
     glBindVertexArray(VAO5);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, mapTexture);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, specularTexture);
     for (int i = 0; i < sizeof(cubePositions) / sizeof(cubePositions[0]); i++)
     {
         model = glm::mat4(1.0f);

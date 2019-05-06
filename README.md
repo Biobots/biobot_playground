@@ -14,7 +14,9 @@
       - [x] Specular lighting
     - [ ] Material
       - [x] Light properties
-      - [ ] Lighting maps
-        - [ ] Diffuse maps
-        - [ ] Specular maps
+      - [x] Lighting maps
+        - [x] Diffuse maps
+        - [x] Specular maps
+    - [ ] Light caster
+    - [ ] Multiple lights
     - [ ] Mesh
