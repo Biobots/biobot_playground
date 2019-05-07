@@ -12,11 +12,11 @@
       - [x] Ambient lighting
       - [x] Diffuse lighting
       - [x] Specular lighting
-    - [ ] Material
+    - [x] Material
       - [x] Light properties
       - [x] Lighting maps
         - [x] Diffuse maps
         - [x] Specular maps
-    - [ ] Light caster
+    - [x] Light caster
     - [ ] Multiple lights
     - [ ] Mesh

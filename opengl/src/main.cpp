@@ -20,8 +20,8 @@ float fov = 45.0f;
 
 Camera mainCamera(glm::vec3(0.0f, 0.0f, 3.0f));
 
-void(*initFunc)() = test5Initialize;
-void(*loopFunc)() = test5Loop;
+void(*initFunc)() = test6Initialize;
+void(*loopFunc)() = test6Loop;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {

@@ -436,3 +436,91 @@ void test5Loop()
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 }
+
+Shader* lightcasterShader;
+unsigned int VAO6, VBO6;
+void test6Initialize()
+{
+    static Shader lightcastertmp("src\\shaders\\cubeshader.vs", "src\\shaders\\lightcastershader.fs");
+    lightcasterShader = &lightcastertmp;
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glGenTextures(1, &mapTexture);
+    glBindTexture(GL_TEXTURE_2D, mapTexture);
+    data1 = stbi_load("container.png", &width1, &height1, &nrChannels1, 0); 
+    if (data1) 
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width1, height1, 0, GL_RGBA, GL_UNSIGNED_BYTE, data1); //png use rgba!
+        glGenerateMipmap(GL_TEXTURE_2D);
+        stbi_image_free(data1);
+        printf("texture1 load success\n");
+    }
+
+    glGenTextures(1, &specularTexture);
+    glBindTexture(GL_TEXTURE_2D, specularTexture);
+    data2 = stbi_load("container_specular.png", &width2, &height2, &nrChannels2, 0); 
+    if (data2) 
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width2, height2, 0, GL_RGBA, GL_UNSIGNED_BYTE, data2); //png use rgba!
+        glGenerateMipmap(GL_TEXTURE_2D);
+        stbi_image_free(data2);
+        printf("texture2 load success\n");
+    }
+
+    glGenVertexArrays(1, &VAO6);
+    glBindVertexArray(VAO6);
+
+    glGenBuffers(1, &VBO6);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO6);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cube), cube, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    printf("initialization success\n");
+}
+
+void test6Loop()
+{
+    lightcasterShader->use();
+    mainCamera.updateMatrix();
+    lightcasterShader->setMat4("view", glm::value_ptr(mainCamera.view));
+    lightcasterShader->setMat4("projection", glm::value_ptr(mainCamera.projection));
+    lightcasterShader->setVec3("viewPos", mainCamera.position);
+    lightcasterShader->setVec3("dirLight.direction", glm::vec3(0.0f, 0.0f, 5.0f));
+    lightcasterShader->setVec3("dirLight.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
+    lightcasterShader->setVec3("dirLight.diffuse", glm::vec3(0.3f, 0.3f, 0.3f));
+    lightcasterShader->setVec3("dirLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+    lightcasterShader->setVec3("pointLight.position", glm::vec3(0.0f, 0.0f, 0.0f));
+    lightcasterShader->setVec3("pointLight.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
+    lightcasterShader->setVec3("pointLight.diffuse", glm::vec3(0.3f, 0.3f, 0.3f));
+    lightcasterShader->setVec3("pointLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+    lightcasterShader->setFloat("pointLight.constant", 1.0f);
+    lightcasterShader->setFloat("pointLight.linear", 0.09f);
+    lightcasterShader->setFloat("pointLight.quadratic", 0.032f);
+    lightcasterShader->setInt("material.diffuse", 0);
+    lightcasterShader->setInt("material.specular", 1);
+    lightcasterShader->setFloat("material.shininess", 128.0f);
+    glBindVertexArray(VAO6);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, mapTexture);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, specularTexture);
+    for (int i = 0; i < sizeof(cubePositions) / sizeof(cubePositions[0]); i++)
+    {
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, cubePositions[i]);
+        float angle = 20.0f * cos(i);
+        model = glm::rotate(model, (float)glfwGetTime() * glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+        lightcasterShader->setMat4("model", glm::value_ptr(model));
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
+}

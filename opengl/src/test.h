@@ -30,4 +30,7 @@ void test4Loop();
 void test5Initialize();
 void test5Loop();
 
+void test6Initialize();
+void test6Loop();
+
 #endif
