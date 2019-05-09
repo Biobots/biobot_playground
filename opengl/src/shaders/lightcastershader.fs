@@ -26,13 +26,15 @@ struct Material {
 	float shininess;
 };
 
+#define POINT_LIGHT_NUM 3
+
 in vec2 TexCoord;
 in vec3 Normal;
 in vec3 FragPos;
 
 uniform Material material;
 uniform DirLight dirLight;
-uniform PointLight pointLight;
+uniform PointLight pointLight[POINT_LIGHT_NUM];
 uniform vec3 viewPos;
 
 out vec4 FragColor;
@@ -43,7 +45,11 @@ vec3 CalPointLight(PointLight pointLight, vec3 normal, vec3 fragpos, vec3 viewpo
 void main()
 {
     vec3 direct = CalDirLight(dirLight, Normal, viewPos);
-    vec3 point = CalPointLight(pointLight, Normal, FragPos, viewPos);
+    vec3 point = vec3(0, 0, 0);
+    for (int i = 0; i < POINT_LIGHT_NUM; i++)
+    {
+        point += CalPointLight(pointLight[i], Normal, FragPos, viewPos);
+    }
 	FragColor = vec4(direct + point, 1.0f);
 }
 

@@ -18,5 +18,5 @@
         - [x] Diffuse maps
         - [x] Specular maps
     - [x] Light caster
-    - [ ] Multiple lights
+    - [x] Multiple lights
     - [ ] Mesh
