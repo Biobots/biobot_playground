@@ -7,6 +7,9 @@
 #include "shader.h"
 #include "test.h"
 #include "camera.h"
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 glm::mat4 view, projection;
 glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f,  3.0f);
@@ -80,7 +83,7 @@ int main()
     glEnable(GL_DEPTH_TEST); 
 
     initFunc();
-    
+    Assimp::Importer importer;
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))

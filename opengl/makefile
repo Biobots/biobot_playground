@@ -5,7 +5,7 @@ SRC		:= src
 INCLUDE         := ./include
 LIB		:= ./lib
 
-LIBRARIES	:= -lglad -lglfw3dll
+LIBRARIES	:= -lglad -lglfw3dll -lassimp -lzlibstatic -lIrrXML
 EXECUTABLE	:= main
 
 all:./$(EXECUTABLE)
