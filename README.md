@@ -19,4 +19,7 @@
         - [x] Specular maps
     - [x] Light caster
     - [x] Multiple lights
-    - [ ] Mesh
+    - [ ] Mesh <font color = red>cant compile assimp, skip</font>
+    - [ ] Advanced opengl
+        - [ ] Depth testing
+        - [ ] Stencil testing
