@@ -25,4 +25,15 @@ def isPrime():
     print(False if(num == 1) else is_prime)
     return
 
-isPrime()
+def max2():
+    x = eval(input('numlist='))
+    m1, m2 = (x[0], x[1]) if x[0] >= x[1] else (x[1], x[0])
+    for i in range(2, len(x)):
+        l = [m1, m2, x[i]]
+        l.sort(reverse = True)
+        m1, m2 = l[0], l[1]
+    print(m1, m2)
+    return
+
+
+max2()
