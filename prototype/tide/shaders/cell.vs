@@ -2,6 +2,7 @@
 layout (location = 0) in vec2 aPos;
 
 uniform mat4 model;
+uniform mat4 projection;
 uniform float pointSize;
 uniform float inColor;
 
@@ -11,7 +12,7 @@ void main()
 {
     vec4 pos = vec4(aPos.x, aPos.y, 0.0, 1.0);
 
-    gl_Position = model * pos;
+    gl_Position = projection * model * pos;
     gl_PointSize = pointSize;
     color = inColor;
 }

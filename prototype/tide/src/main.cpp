@@ -9,18 +9,20 @@
 #include "shader.h"
 #include "camera.h"
 #include "cell.h"
+#include "gameobject.h"
 
 float deltaTime = 0.0f;
 float preFrame = 0.0f;
 
-const int COL = 2;  //y
-const int ROW = 12; //x
+const int COL = 10;  //y
+const int ROW = 10; //x
+glm::mat4 projection = glm::ortho(0.0f, (float)SCR_WIDTH, (float)SCR_HEIGHT, 0.0f, -1.0f, 1.0f);
 
 Cell* cells[COL][ROW];
 
 float xoffset = -0.5;
 float yoffset = -0.5;
-float scale = 10;
+float scale = 50;
 float pointSize = 20;
 
 int totalsize = sizeof(cells) / sizeof(Cell*);
@@ -33,6 +35,7 @@ float vertices[] = {
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
+    glm::mat4 projection = glm::ortho(0.0f, (float)width, (float)height, 0.0f, -1.0f, 1.0f);
 }
 void processInput(GLFWwindow *window)
 {
@@ -104,8 +107,8 @@ int main()
         {
             cells[i][j] = new Cell();
             cells[i][j]->setExistence(((i + j) % 2 == 0) ? true : false);
-            cells[i][j]->xPos = (float)j / scale;
-            cells[i][j]->yPos = (float)i / scale;
+            cells[i][j]->xPos = (float)j * scale;
+            cells[i][j]->yPos = (float)i * scale;
         }
     }
 
@@ -137,6 +140,7 @@ int main()
             {
                 glm::mat4 model = glm::mat4(1.0f);
                 model = glm::translate(model, glm::vec3(cells[i][j]->xPos, cells[i][j]->yPos, 0));
+                shader.setMat4("projection", glm::value_ptr(projection));
                 shader.setMat4("model", glm::value_ptr(model));
                 shader.setFloat("inColor", (int)cells[i][j]->getExistence());
                 glDrawArrays(GL_POINTS, 0, 1);
