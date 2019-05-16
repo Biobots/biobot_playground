@@ -26,8 +26,8 @@
         - [ ] Depth testing
         - [ ] Stencil testing
 
-2. [OpenGL 2D framework](https://github.com/Biobots/biobot_playground/tree/master/prototype/tide)
-   
-   - [ ] Gameobject class
-     - [x] projection matrix
-     - [ ] Gameobject manager 
+2. [Tide: simple cellular automata prototype](https://github.com/Biobots/biobot_playground/tree/master/prototype/tide)
+
+    - [x] Coordinate system
+    - [x] Mouse input detection
+    - [ ] Cell class

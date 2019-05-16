@@ -23,13 +23,20 @@ Cell* cells[COL][ROW];
 float xoffset = -0.5;
 float yoffset = -0.5;
 float scale = 50;
-float pointSize = 20;
+float pointSize = 25;
 
 int totalsize = sizeof(cells) / sizeof(Cell*);
 int rowsize = sizeof(cells[0]) / sizeof(Cell*);
 int colsize = totalsize / rowsize;
 float vertices[] = {
-    0.0f, 0.0f
+    pointSize, pointSize,
+    pointSize, -pointSize,
+    -pointSize, -pointSize,
+    -pointSize,  pointSize
+};
+unsigned int indices[] = {
+    0, 1, 3,
+    1, 2, 3
 };
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -50,16 +57,20 @@ void mouseInput(GLFWwindow* window, int button, int action, int mods)
     {
         double xPos, yPos;
         glfwGetCursorPos(window, &xPos, &yPos);
-        printf("clicked1");
-        float xCursor = ((float)xPos - xoffset * SCR_WIDTH);
-        float yCursor = SCR_HEIGHT - ((float)yPos + yoffset * SCR_HEIGHT);
-        printf("x:%f y:%f\n", xCursor, yCursor);
+        printf("clicked1:%f, %f\n", (float)xPos, (float)yPos);
         for (int i = 0; i < colsize; i++)
         {
             for (int j = 0; j < rowsize; j++)
             {
-                Cell cell = *cells[i][j];
-                printf("x:%f y:%f\n", SCR_WIDTH*cell.xPos, SCR_HEIGHT*cell.yPos);
+                Cell* cell = cells[i][j];
+                if (xPos >= cell->xPos - pointSize && xPos <= cell->xPos + pointSize &&
+                    yPos >= cell->yPos - pointSize && yPos <= cell->yPos + pointSize)
+                    {
+                        printf("pre:%d\n", (int)cell->getExistence());
+                        cell->setExistence(!cell->getExistence());
+                        printf("clicked2:%f ,%f\n", cell->xPos, cell->yPos);
+                        printf("aft:%d\n", (int)cell->getExistence());
+                    }
             }
         }
     }
@@ -96,10 +107,11 @@ int main()
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
-    glEnable(GL_PROGRAM_POINT_SIZE); 
+    //glEnable(GL_PROGRAM_POINT_SIZE); 
     
     
-    
+    float xoffset = SCR_WIDTH / 2 - (float)rowsize * scale / 2;
+    float yoffset = SCR_HEIGHT / 2 - (float)colsize * scale / 2;
     
     for (int i = 0; i < colsize; i++)
     {
@@ -107,20 +119,25 @@ int main()
         {
             cells[i][j] = new Cell();
             cells[i][j]->setExistence(((i + j) % 2 == 0) ? true : false);
-            cells[i][j]->xPos = (float)j * scale;
-            cells[i][j]->yPos = (float)i * scale;
+            cells[i][j]->xPos = (float)j * scale + xoffset;
+            cells[i][j]->yPos = (float)i * scale + yoffset;
         }
     }
 
-    unsigned int VAO, VBO;
+    unsigned int VAO, VBO, EBO;
+    glGenBuffers(1, &EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);;
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     Shader shader("shaders\\cell.vs", "shaders\\cell.fs");
 
@@ -133,7 +150,6 @@ int main()
 
         shader.use();
         glBindVertexArray(VAO);
-        shader.setFloat("pointSize", 10.0f);
         for (int i = 0; i < colsize; i++)
         {
             for (int j = 0; j < rowsize; j++)
@@ -143,7 +159,7 @@ int main()
                 shader.setMat4("projection", glm::value_ptr(projection));
                 shader.setMat4("model", glm::value_ptr(model));
                 shader.setFloat("inColor", (int)cells[i][j]->getExistence());
-                glDrawArrays(GL_POINTS, 0, 1);
+                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
             }
         }   
 
