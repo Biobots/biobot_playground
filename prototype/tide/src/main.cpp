@@ -14,16 +14,16 @@
 float deltaTime = 0.0f;
 float preFrame = 0.0f;
 
-const int COL = 10;  //y
-const int ROW = 10; //x
+const int COL = 200;  //y
+const int ROW = 200; //x
 glm::mat4 projection = glm::ortho(0.0f, (float)SCR_WIDTH, (float)SCR_HEIGHT, 0.0f, -1.0f, 1.0f);
 
 Cell* cells[COL][ROW];
 
 float xoffset = -0.5;
 float yoffset = -0.5;
-float scale = 50;
-float pointSize = 25;
+float scale = 2.5;
+float pointSize = 1.25;
 
 int totalsize = sizeof(cells) / sizeof(Cell*);
 int rowsize = sizeof(cells[0]) / sizeof(Cell*);
@@ -50,6 +50,29 @@ void processInput(GLFWwindow *window)
     {
         glfwSetWindowShouldClose(window, true);
     }
+}
+void processCellLogic()
+{
+    for (int i = 1; i < colsize - 1; i++)
+    {
+        for (int j = 1; j < rowsize - 1; j++)
+        {
+            Cell* cell = cells[i][j];
+            int num = (int)cells[i][j-1]->isExistCopy + (int)cells[i-1][j]->isExistCopy + 
+                (int)cells[i][j+1]->isExistCopy + (int)cells[i+1][j]->isExistCopy +
+                (int)cells[i-1][j-1]->isExistCopy + (int)cells[i-1][j+1]->isExistCopy + 
+                (int)cells[i+1][j+1]->isExistCopy + (int)cells[i+1][j-1]->isExistCopy;
+            if (num >= 3 && num <= 5)
+            {
+                cell->setExistence(true);
+            }
+            else
+            {
+                cell->setExistence(false);
+            }
+        }
+    }
+    
 }
 void mouseInput(GLFWwindow* window, int button, int action, int mods)
 {
@@ -154,6 +177,8 @@ int main()
         {
             for (int j = 0; j < rowsize; j++)
             {
+                Cell* cell = cells[i][j];
+                cell->isExistCopy = cell->getExistence();
                 glm::mat4 model = glm::mat4(1.0f);
                 model = glm::translate(model, glm::vec3(cells[i][j]->xPos, cells[i][j]->yPos, 0));
                 shader.setMat4("projection", glm::value_ptr(projection));
@@ -167,8 +192,14 @@ int main()
         // glfw: swap buffers and poll IO events (keyspressed/released, mouse moved etc.)
         // ---------------------------------------------------
         float curFrame = glfwGetTime();
-        deltaTime = curFrame - preFrame;
+        deltaTime += curFrame - preFrame;
         preFrame = curFrame;
+        if (deltaTime >= (float)1/10)
+        {
+            printf("time:%f\n", deltaTime);
+            deltaTime = 0;
+            processCellLogic();
+        }
         processInput(window);
         glfwSwapBuffers(window);
         glfwPollEvents();

@@ -8,6 +8,7 @@ private:
 public:
     float xPos;
     float yPos;
+    bool isExistCopy;
 
     Cell();
     ~Cell();
