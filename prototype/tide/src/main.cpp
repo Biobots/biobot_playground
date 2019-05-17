@@ -14,20 +14,24 @@
 float deltaTime = 0.0f;
 float preFrame = 0.0f;
 
-const int COL = 200;  //y
-const int ROW = 200; //x
+bool isPaused = false;
+
+const int COL = 40; //y
+const int ROW = 60; //x
 glm::mat4 projection = glm::ortho(0.0f, (float)SCR_WIDTH, (float)SCR_HEIGHT, 0.0f, -1.0f, 1.0f);
 
 Cell* cells[COL][ROW];
 
-float xoffset = -0.5;
-float yoffset = -0.5;
-float scale = 2.5;
-float pointSize = 1.25;
+float scale = 12.5;
+float pointSize = 6.25;
 
 int totalsize = sizeof(cells) / sizeof(Cell*);
 int rowsize = sizeof(cells[0]) / sizeof(Cell*);
 int colsize = totalsize / rowsize;
+
+float xoffset = SCR_WIDTH / 2 - (float)(rowsize - 1) * scale / 2;
+float yoffset = SCR_HEIGHT / 2 - (float)(colsize - 1) * scale / 2;
+
 float vertices[] = {
     pointSize, pointSize,
     pointSize, -pointSize,
@@ -38,17 +42,35 @@ unsigned int indices[] = {
     0, 1, 3,
     1, 2, 3
 };
-
+void updateCellPos();
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
-    glm::mat4 projection = glm::ortho(0.0f, (float)width, (float)height, 0.0f, -1.0f, 1.0f);
+    projection = glm::ortho(0.0f, (float)width, (float)height, 0.0f, -1.0f, 1.0f);
+    xoffset = width / 2 - (float)(rowsize - 1) * scale / 2;
+    yoffset = height / 2 - (float)(colsize - 1) * scale / 2;
+    updateCellPos();
 }
 void processInput(GLFWwindow *window)
 {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {
         glfwSetWindowShouldClose(window, true);
+    }
+    if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+    {
+        isPaused = !isPaused;
+    }
+}
+void updateCellPos()
+{
+    for (int i = 0; i < colsize; i++)
+    {
+        for (int j = 0; j < rowsize; j++)
+        {
+            cells[i][j]->xPos = (float)j * scale + xoffset;
+            cells[i][j]->yPos = (float)i * scale + yoffset;
+        }
     }
 }
 void processCellLogic()
@@ -88,12 +110,10 @@ void mouseInput(GLFWwindow* window, int button, int action, int mods)
                 Cell* cell = cells[i][j];
                 if (xPos >= cell->xPos - pointSize && xPos <= cell->xPos + pointSize &&
                     yPos >= cell->yPos - pointSize && yPos <= cell->yPos + pointSize)
-                    {
-                        printf("pre:%d\n", (int)cell->getExistence());
-                        cell->setExistence(!cell->getExistence());
-                        printf("clicked2:%f ,%f\n", cell->xPos, cell->yPos);
-                        printf("aft:%d\n", (int)cell->getExistence());
-                    }
+                {
+                    cell->setExistence(!cell->getExistence());
+                    printf("clicked2:%f ,%f\n", cell->xPos, cell->yPos);
+                }
             }
         }
     }
@@ -130,18 +150,16 @@ int main()
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
-    //glEnable(GL_PROGRAM_POINT_SIZE); 
     
     
-    float xoffset = SCR_WIDTH / 2 - (float)rowsize * scale / 2;
-    float yoffset = SCR_HEIGHT / 2 - (float)colsize * scale / 2;
     
     for (int i = 0; i < colsize; i++)
     {
         for (int j = 0; j < rowsize; j++)
         {
             cells[i][j] = new Cell();
-            cells[i][j]->setExistence(((i + j) % 2 == 0) ? true : false);
+            //cells[i][j]->setExistence(((i + j) % 2 == 0) ? true : false);
+            cells[i][j]->setExistence(false);
             cells[i][j]->xPos = (float)j * scale + xoffset;
             cells[i][j]->yPos = (float)i * scale + yoffset;
         }
@@ -183,7 +201,7 @@ int main()
                 model = glm::translate(model, glm::vec3(cells[i][j]->xPos, cells[i][j]->yPos, 0));
                 shader.setMat4("projection", glm::value_ptr(projection));
                 shader.setMat4("model", glm::value_ptr(model));
-                shader.setFloat("inColor", (int)cells[i][j]->getExistence());
+                shader.setFloat("inColor", 1 - (int)cells[i][j]->getExistence()); //0: black, 1: white
                 glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
             }
         }   
@@ -194,11 +212,14 @@ int main()
         float curFrame = glfwGetTime();
         deltaTime += curFrame - preFrame;
         preFrame = curFrame;
-        if (deltaTime >= (float)1/10)
+        if (deltaTime >= (float)1/5)
         {
-            printf("time:%f\n", deltaTime);
+            printf("time:%f, pause:%d\n", deltaTime, (int)isPaused);
             deltaTime = 0;
-            processCellLogic();
+            if (!isPaused)
+            {
+                processCellLogic();
+            }
         }
         processInput(window);
         glfwSwapBuffers(window);
