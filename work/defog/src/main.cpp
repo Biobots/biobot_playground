@@ -24,10 +24,11 @@ float calT(uchar input, uchar alpha)
 
 int main()
 {
-    Mat img = imread("a.jpg", ImreadModes::IMREAD_COLOR);
+    Mat img = imread("c.jpg", ImreadModes::IMREAD_COLOR);
 	imshow("original", img);
     int channels = img.channels();
     Mat tmp(img.size(), img.type());
+    printf("size:%d,%d channel:%d\n", img.rows, img.cols, img.channels());
     double duration;
     clock_t start, finish;
     start = clock();
@@ -47,7 +48,7 @@ int main()
     Mat drk(img.size(), CV_8UC1);
     cvtColor(tmp, drk, COLOR_BGR2GRAY);
     imshow("step 1", drk);
-    int radius = 7;
+    int radius = 25;
     Mat drkc(img.size(), CV_8UC1);
     int col, row;
     uchar globalmin = 255;
@@ -89,17 +90,17 @@ int main()
     uchar b = 0;
     for (int h = -radius; h < 2 * radius + 1; h++)
     {
-        uchar* p = img.ptr<uchar>(h);
-        for (int k = -radius * channels; k < (2 * radius + 1) * channels; k+=channels)
+        uchar* p = img.ptr<uchar>(row + h);
+        for (int k = -radius * channels; k < (2 * radius + 1) * channels; k += channels)
         {
-            if (row + h < drk.rows && col + k < drk.cols * channels)
+            if (row + h < img.rows && col + k < img.cols * channels)
             {
-                if ((p[k] + p[k + 1] + p[k + 2]) > (r + b + g))
+                if ((p[col + k] + p[col + k + 1] + p[col + k + 2]) > (r + b + g))
                 {
-                    r = p[k + 2];
-                    g = p[k + 1];
-                    b = p[k];
-                }
+                    r = p[col + k + 2];
+                    g = p[col + k + 1];
+                    b = p[col + k];
+                } 
             }
         }
     }
