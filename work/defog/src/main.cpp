@@ -56,7 +56,7 @@ Mat guidedfilter(Mat &srcImage, Mat &srcClone, int r, double eps, int ddepth)
 
 int main()
 {
-    Mat img = imread("e.jpg", ImreadModes::IMREAD_COLOR);
+    Mat img = imread("j.jpg", ImreadModes::IMREAD_COLOR);
 	imshow("original", img);
     int channels = img.channels();
     Mat tmp(img.size(), img.type());
@@ -84,9 +84,9 @@ int main()
     Mat drkb(img.size(), CV_8UC1);
     list<int> lcol, lrow;
     map<uchar, pair<int, int>> mitem;
-    for (int i = radius; i < drk.rows; i += 2 * radius + 1)
+    for (int i = radius; i < drk.rows; i ++)
     {
-        for (int j = radius; j < drk.cols; j += 2 * radius + 1)
+        for (int j = radius; j < drk.cols; j ++)
         {
             uchar minnum;
             minnum = drk.ptr<uchar>(i)[j];
@@ -113,8 +113,8 @@ int main()
             mitem.insert(map<uchar, pair<int, int>>::value_type (minnum, pair<int, int>(i, j)));
         }
     }
-    Mat drkcc = drkb.clone();
-    Mat drkc = guidedfilter(drk, drkb, 50, 0.5, CV_8UC1);
+    //Mat drkcc = drkb.clone();
+    //Mat drkc = guidedfilter(drk, drkb, 10, 0.01, CV_8UC1);
     uchar r = 0;
     uchar g = 0;
     uchar b = 0;
@@ -142,21 +142,46 @@ int main()
             }
         }
     }
+    Mat gray;
+    cvtColor(img, gray, COLOR_BGR2GRAY);
+    Mat t(img.size(), img.type());
+    for (int i = 0; i < img.rows; i++)
+    {
+        uchar* p = drkb.ptr<uchar>(i);
+        uchar* q = t.ptr<uchar>(i);
+        for (int j = 0; j < img.cols * channels; j += 3)
+        {
+            q[j] = 255 * calT(p[j/3], b);
+            q[j + 1] = 255 * calT(p[j/3], g);
+            q[j + 2] = 255 * calT(p[j/3], r);
+        }
+    }
+    vector<Mat> tv, vrst;
+    split(t, tv);
     
+    for (int i = 0; i < t.channels(); i++)
+    {
+        Mat result = guidedfilter(gray, tv[i], 7, 0.001, CV_8UC1);
+        vrst.push_back(result);
+    }
     //r=255; g=255; b=255;
     printf("%d, %d, %d, %d\n", (int)r, (int)g, (int)b, pixelnum);
-    imshow("step 2", drkc);
+    imshow("step 2", gray);
+    imshow("step 3", tv[0]);
+    Mat rst;
+    merge(vrst, rst);
+    imshow("step 4", vrst[1]);
     Mat dst(img.size(), img.type());
     for (int i = 0; i < img.rows; i++)
     {
         uchar* p = img.ptr<uchar>(i);
         uchar* output = dst.ptr<uchar>(i);
-        uchar* d = drkc.ptr<uchar>(i);
+        uchar* d = rst.ptr<uchar>(i);
         for (int j = 0; j < img.cols * channels; j += 3)
         {
-            float a = ((p[j] - b) / calT(d[j/3], b) + b);
-            float b = ((p[j + 1] - g) / calT(d[j/3 + 1], g) + g);
-            float c = ((p[j + 2] - r) / calT(d[j/3 + 2], r) + r);
+            float a = ((p[j] - b) * 255 / d[j] + b);
+            float b = ((p[j + 1] - g) * 255 / d[j + 1] + g);
+            float c = ((p[j + 2] - r) * 255 / d[j + 2] + r);
             
             a = a > 255 ? 255 : a;
             b = b > 255 ? 255 : b;
@@ -172,7 +197,7 @@ int main()
         }
     }
     finish = clock();
-    imshow("step 3", dst);
+    imshow("step 5", dst);
     duration = (double)(finish - start) / CLOCKS_PER_SEC; 
     printf( "%f seconds\n", duration );
     waitKey();
