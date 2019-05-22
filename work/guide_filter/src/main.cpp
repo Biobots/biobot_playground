@@ -12,7 +12,7 @@ Mat guidedfilter(Mat &srcImage, Mat &srcClone, int r, double eps);
 
 int main()
 {
-    Mat src = imread("a.jpg", ImreadModes::IMREAD_COLOR);
+    Mat src = imread("c.jpg", ImreadModes::IMREAD_COLOR);
     vector<Mat> vsrc, vrst;
     split(src, vsrc);
     Mat rst;
@@ -21,7 +21,7 @@ int main()
         Mat tmp;
         vsrc[i].convertTo(tmp, CV_64FC1, 1.0/255.0);
         Mat p = tmp.clone();
-        Mat result = guidedfilter(tmp, p, 6, 0.01);
+        Mat result = guidedfilter(tmp, p, 6, 0.001);
         result.convertTo(result, CV_8UC1, 255.0);
         vrst.push_back(result);
     }
