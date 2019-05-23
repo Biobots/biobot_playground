@@ -5,13 +5,15 @@
 #include <iostream>
 #include <time.h>
 #include <map>
+#include <vector>
 
 using namespace cv;
 using namespace std;
 
 float calT(uchar input, uchar alpha)
 {
-    float t = 1 - 0.75 * (float)input / (float)alpha;
+    float t = 1 - 0.95 * (float)input / 255;
+    //printf("%f\n", t);
     if (t > 0.1)
     {
         return t;
@@ -57,9 +59,14 @@ Mat guidedfilter(Mat &srcImage, Mat &srcClone, int r, double eps, int ddepth)
     return resultMat;
 }
 
+bool acompare(const pair<uchar, pair<int, int>> &a, const pair<uchar, pair<int, int>> &b)
+{
+    return a.first > b.first;
+}
+
 int main()
 {
-    Mat img = imread("c.jpg", ImreadModes::IMREAD_COLOR);
+    Mat img = imread("k.jpg", ImreadModes::IMREAD_COLOR);
 	imshow("original", img);
     int channels = img.channels();
     Mat tmp(img.size(), img.type());
@@ -86,10 +93,10 @@ int main()
     int radius = 11;
     Mat drkb(img.size(), CV_8UC1);
     list<int> lcol, lrow;
-    map<uchar, pair<int, int>> mitem;
-    for (int i = radius; i < drk.rows; i ++)
+    vector<pair<uchar, pair<int, int>>> mitem;
+    for (int i = radius; i < drk.rows; i += 2*radius+1)
     {
-        for (int j = radius; j < drk.cols; j ++)
+        for (int j = radius; j < drk.cols; j +=2*radius+1)
         {
             uchar minnum;
             minnum = drk.ptr<uchar>(i)[j];
@@ -100,6 +107,7 @@ int main()
                     if (i + h < drk.rows && j + k < drk.cols)
                     {
                         minnum = minnum > drk.ptr<uchar>(i + h)[j + k] ? drk.ptr<uchar>(i + h)[j + k] : minnum;
+                        mitem.push_back(make_pair(drk.ptr<uchar>(i + h)[j + k], make_pair(i + h, j + k)));
                     }
                 }
             }
@@ -113,40 +121,33 @@ int main()
                     }
                 }
             }
-            mitem.insert(map<uchar, pair<int, int>>::value_type (minnum, pair<int, int>(i, j)));
         }
     }
     //Mat drkcc = drkb.clone();
     //Mat drkc = guidedfilter(drk, drkb, 10, 0.01, CV_8UC1);
-    uchar r = 0;
-    uchar g = 0;
-    uchar b = 0;
-    map<uchar, pair<int, int>>::iterator iter;
-    int pixelnum = img.cols * img.rows / 1000;
+    uchar r = 255;
+    uchar g = 255;
+    uchar b = 255;
+    int pixelnum = mitem.size() / 1000;
+    printf("%d\n", pixelnum);
+    std::sort(mitem.begin(), mitem.end(), acompare);
     for (int i = 0; i < pixelnum; i++)
     {
-        iter = mitem.find(i);
-        int col = iter->second.first;
-        int row = iter->second.second;
-        for (int h = -radius; h < 2 * radius + 1; h++)
+        //printf("%d, %d, %d\n", (int)mitem[i].first, mitem[i].second.first, mitem[i].second.second);
+        int row = mitem[i].second.first;
+        int col = mitem[i].second.second;
+        uchar* p = img.ptr<uchar>(row);
+        if ((p[3 * col] + p[3 * col + 1] + p[3 * col + 2]) < (r + b + g))
         {
-            uchar* p = img.ptr<uchar>(row + h);
-            for (int k = -radius * channels; k < (2 * radius + 1) * channels; k += channels)
-            {
-                if (row + h < img.rows && col + k < img.cols * channels)
-                {
-                    if ((p[col + k] + p[col + k + 1] + p[col + k + 2]) > (r + b + g))
-                    {
-                        r = p[col + k + 2];
-                        g = p[col + k + 1];
-                        b = p[col + k];
-                    } 
-                }
-            }
+            r = p[3 * col + 2];
+            g = p[3 * col + 1];
+            b = p[3 * col];
         }
     }
     Mat gray;
+    vector<Mat> vimg;
     cvtColor(img, gray, COLOR_BGR2GRAY);
+    split(img, vimg);
     Mat t(img.size(), img.type());
     for (int i = 0; i < img.rows; i++)
     {
@@ -164,12 +165,11 @@ int main()
     
     for (int i = 0; i < t.channels(); i++)
     {
-        Mat result = guidedfilter(gray, tv[i], 50 * radius, 0.001, CV_8UC1);
+        Mat result = guidedfilter(vimg[i], tv[i], 50 * radius, 0.001, CV_8UC1);
         vrst.push_back(result);
     }
     //r=255; g=255; b=255;
     printf("%d, %d, %d, %d\n", (int)r, (int)g, (int)b, pixelnum);
-    imshow("step 2", gray);
     imshow("step 3", tv[0]);
     Mat rst;
     merge(vrst, rst);
@@ -180,7 +180,7 @@ int main()
         uchar* p = img.ptr<uchar>(i);
         uchar* output = dst.ptr<uchar>(i);
         uchar* d = rst.ptr<uchar>(i);
-        for (int j = 0; j < img.cols * channels; j += 3)
+        for (int j = 0; j < img.cols * channels; j += channels)
         {
             float a = ((p[j] - b) * 255 / d[j] + b);
             float b = ((p[j + 1] - g) * 255 / d[j + 1] + g);
