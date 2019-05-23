@@ -25,38 +25,41 @@ float calT(uchar input, uchar alpha)
 
 Mat guidedfilter(Mat &srcImage, Mat &srcClone, int r, double eps, int ddepth)
 {
-    srcImage.convertTo(srcImage, ddepth);
-    srcClone.convertTo(srcClone, ddepth);
+    srcImage.convertTo(srcImage, CV_32FC1);
+    srcClone.convertTo(srcClone, CV_32FC1);
     int NumRows = srcImage.rows;
     int NumCols = srcImage.cols;
     Mat boxResult;
-    boxFilter(Mat::ones(NumRows, NumCols, srcImage.type()), boxResult, ddepth, Size(r, r));
+    boxFilter(Mat::ones(NumRows, NumCols, srcImage.type()), boxResult, CV_32FC1, Size(r, r));
     Mat mean_I;
-    boxFilter(srcImage, mean_I, ddepth, Size(r, r));
+    boxFilter(srcImage, mean_I, CV_32FC1, Size(r, r));
     Mat mean_P;
-    boxFilter(srcClone, mean_P, ddepth, Size(r, r));
+    boxFilter(srcClone, mean_P, CV_32FC1, Size(r, r));
     Mat mean_IP;
-    boxFilter(srcImage.mul(srcClone), mean_IP, ddepth, Size(r, r));
+    boxFilter(srcImage.mul(srcClone), mean_IP, CV_32FC1, Size(r, r));
     Mat cov_IP = mean_IP - mean_I.mul(mean_P);
     Mat mean_II;
-    boxFilter(srcImage.mul(srcImage), mean_II, ddepth, Size(r, r));
+    boxFilter(srcImage.mul(srcImage), mean_II, CV_32FC1, Size(r, r));
     Mat var_I = mean_II - mean_I.mul(mean_I);
     Mat var_IP = mean_IP - mean_I.mul(mean_P);
     Mat a = cov_IP / (var_I + eps);
     Mat b = mean_P - a.mul(mean_I);
     Mat mean_a;
-    boxFilter(a, mean_a, ddepth, Size(r, r));
+    boxFilter(a, mean_a, CV_32FC1, Size(r, r));
     mean_a = mean_a / boxResult;
     Mat mean_b;
-    boxFilter(b, mean_b, ddepth, Size(r, r));
+    boxFilter(b, mean_b, CV_32FC1, Size(r, r));
     mean_b = mean_b / boxResult;
     Mat resultMat = mean_a.mul(srcImage) + mean_b;
+    resultMat.convertTo(resultMat, ddepth);
+    srcImage.convertTo(srcImage, ddepth);
+    srcClone.convertTo(srcClone, ddepth);
     return resultMat;
 }
 
 int main()
 {
-    Mat img = imread("j.jpg", ImreadModes::IMREAD_COLOR);
+    Mat img = imread("c.jpg", ImreadModes::IMREAD_COLOR);
 	imshow("original", img);
     int channels = img.channels();
     Mat tmp(img.size(), img.type());
@@ -161,7 +164,7 @@ int main()
     
     for (int i = 0; i < t.channels(); i++)
     {
-        Mat result = guidedfilter(gray, tv[i], 7, 0.001, CV_8UC1);
+        Mat result = guidedfilter(gray, tv[i], 50 * radius, 0.001, CV_8UC1);
         vrst.push_back(result);
     }
     //r=255; g=255; b=255;
