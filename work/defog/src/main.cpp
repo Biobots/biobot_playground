@@ -14,13 +14,13 @@ float calT(uchar input, uchar alpha)
 {
     float t = 1 - 0.95 * (float)input / 255;
     //printf("%f\n", t);
-    if (t > 0.1)
+    if (t > 0)
     {
         return t;
     }
     else
     {
-        return 0.1;
+        return 0;
     }
     
 }
@@ -64,33 +64,33 @@ bool acompare(const pair<uchar, pair<int, int>> &a, const pair<uchar, pair<int, 
     return a.first > b.first;
 }
 
+int scale = 1;
+int radius = 11;
+
 int main()
 {
-    Mat img = imread("k.jpg", ImreadModes::IMREAD_COLOR);
-	imshow("original", img);
+    Mat src = imread("c.jpg", ImreadModes::IMREAD_COLOR);
+    Mat img;
+    resize(src, img, Size(0, 0), (double)1/scale, (double)1/scale, INTER_AREA);
+	//imshow("original", img);
     int channels = img.channels();
-    Mat tmp(img.size(), img.type());
-    printf("size:%d,%d channel:%d\n", img.rows, img.cols, img.channels());
+    Mat drk(img.size(), CV_8UC1);
+    //printf("size:%d,%d channel:%d\n", img.rows, img.cols, img.channels());
     double duration;
     clock_t start, finish;
     start = clock();
     for (int i = 0; i < img.rows; i++)
     {
         uchar* p = img.ptr<uchar>(i);
-        uchar* output = tmp.ptr<uchar>(i);
+        uchar* output = drk.ptr<uchar>(i);
         for (int j = 0; j < img.cols * channels; j += channels)
         {
             uchar temp = p[j] > p[j+1] ? p[j+1] : p[j];
             temp = temp > p[j+2] ? p[j+2] : temp;
-            output[j] = temp;
-            output[j + 1] = temp;
-            output[j + 2] = temp;
+            output[j / 3] = temp;
         }
     }
-    Mat drk(img.size(), CV_8UC1);
-    cvtColor(tmp, drk, COLOR_BGR2GRAY);
-    imshow("step 1", drk);
-    int radius = 11;
+    //imshow("step 1", drk);
     Mat drkb(img.size(), CV_8UC1);
     list<int> lcol, lrow;
     vector<pair<uchar, pair<int, int>>> mitem;
@@ -144,9 +144,8 @@ int main()
             b = p[3 * col];
         }
     }
-    Mat gray;
+    //r=255; g=255; b=255;
     vector<Mat> vimg;
-    cvtColor(img, gray, COLOR_BGR2GRAY);
     split(img, vimg);
     Mat t(img.size(), img.type());
     for (int i = 0; i < img.rows; i++)
@@ -168,40 +167,44 @@ int main()
         Mat result = guidedfilter(vimg[i], tv[i], 50 * radius, 0.001, CV_8UC1);
         vrst.push_back(result);
     }
-    //r=255; g=255; b=255;
     printf("%d, %d, %d, %d\n", (int)r, (int)g, (int)b, pixelnum);
-    imshow("step 3", tv[0]);
+    //imshow("step 3", t);
     Mat rst;
     merge(vrst, rst);
-    imshow("step 4", vrst[1]);
-    Mat dst(img.size(), img.type());
-    for (int i = 0; i < img.rows; i++)
+    Mat uprst;
+    resize(rst, uprst, Size(0, 0), scale, scale, INTER_LINEAR);
+    //imshow("step 4", vrst[1]);
+    Mat dst(uprst.size(), uprst.type());
+    float bb;
+    float gg;
+    float rr;
+    for (int i = 0; i < uprst.rows; i++)
     {
-        uchar* p = img.ptr<uchar>(i);
+        uchar* p = src.ptr<uchar>(i);
         uchar* output = dst.ptr<uchar>(i);
-        uchar* d = rst.ptr<uchar>(i);
-        for (int j = 0; j < img.cols * channels; j += channels)
+        uchar* d = uprst.ptr<uchar>(i);
+        for (int j = 0; j < uprst.cols * channels; j += channels)
         {
-            float a = ((p[j] - b) * 255 / d[j] + b);
-            float b = ((p[j + 1] - g) * 255 / d[j + 1] + g);
-            float c = ((p[j + 2] - r) * 255 / d[j + 2] + r);
+            bb = (((float)p[j] - b) * 255 / (float)d[j] + b);
+            gg = (((float)p[j + 1] - g) * 255 / (float)d[j + 1] + g);
+            rr = (((float)p[j + 2] - r) * 255 / (float)d[j + 2] + r);
             
-            a = a > 255 ? 255 : a;
-            b = b > 255 ? 255 : b;
-            c = c > 255 ? 255 : c;
-            a = a < 0 ? 0 : a;
-            b = b < 0 ? 0 : b;
-            c = c < 0 ? 0 : c;
+            bb = bb > 255 ? 255 : bb;
+            gg = gg > 255 ? 255 : gg;
+            rr = rr > 255 ? 255 : rr;
+            bb = bb < 0 ? 0 : bb;
+            gg = gg < 0 ? 0 : gg;
+            rr = rr < 0 ? 0 : rr;
 
-            output[j] = (uchar)a;
-            output[j + 1] = (uchar)b;
-            output[j + 2] = (uchar)c;
+            output[j] = (uchar)bb;
+            output[j + 1] = (uchar)gg;
+            output[j + 2] = (uchar)rr;
             //printf("%d, %d, %d\n", output[j], output[j+1], output[j+2]);
         }
     }
     finish = clock();
+    duration = (double)(finish - start) / CLOCKS_PER_SEC;
     imshow("step 5", dst);
-    duration = (double)(finish - start) / CLOCKS_PER_SEC; 
     printf( "%f seconds\n", duration );
     waitKey();
 	return 0;
