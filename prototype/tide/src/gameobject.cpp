@@ -19,3 +19,13 @@ void GameObject::setYpos(float value)
 {
 	ypos = value;
 }
+
+int GameObject::render()
+{
+    vector<GameObject>::iterator iter = Children.begin();
+    for (; iter != Children.end(); iter++)
+    {
+        iter->render();
+    }
+    return 0;
+}

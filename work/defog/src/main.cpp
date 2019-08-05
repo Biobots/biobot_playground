@@ -69,10 +69,10 @@ int radius = 11;
 
 int main()
 {
-    Mat src = imread("c.jpg", ImreadModes::IMREAD_COLOR);
+    Mat src = imread("m.jpg", ImreadModes::IMREAD_COLOR);
     Mat img;
     resize(src, img, Size(0, 0), (double)1/scale, (double)1/scale, INTER_AREA);
-	//imshow("original", img);
+	imshow("original", img);
     int channels = img.channels();
     Mat drk(img.size(), CV_8UC1);
     //printf("size:%d,%d channel:%d\n", img.rows, img.cols, img.channels());
@@ -129,7 +129,7 @@ int main()
     uchar g = 255;
     uchar b = 255;
     int pixelnum = mitem.size() / 1000;
-    printf("%d\n", pixelnum);
+    //printf("%d\n", pixelnum);
     std::sort(mitem.begin(), mitem.end(), acompare);
     for (int i = 0; i < pixelnum; i++)
     {
@@ -167,7 +167,7 @@ int main()
         Mat result = guidedfilter(vimg[i], tv[i], 50 * radius, 0.001, CV_8UC1);
         vrst.push_back(result);
     }
-    printf("%d, %d, %d, %d\n", (int)r, (int)g, (int)b, pixelnum);
+    //printf("%d, %d, %d, %d\n", (int)r, (int)g, (int)b, pixelnum);
     //imshow("step 3", t);
     Mat rst;
     merge(vrst, rst);
