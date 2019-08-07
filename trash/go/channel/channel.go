@@ -25,4 +25,9 @@ func main() {
 	case <-timeout:
 		fmt.Println("timeout")
 	}
+	chb := make(chan int, 3) //buffer 3
+	chb <- 1
+	chb <- 2
+	chb <- 3
+	fmt.Println(len(chb))
 }
