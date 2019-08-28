@@ -12,3 +12,5 @@ prototype/automata/Library/StateCache
 prototype/tide/main.exe
 work/defog/main.exe
 work/guide_filter/main.exe
+work/cltest/libs
+work/cltest/obj
