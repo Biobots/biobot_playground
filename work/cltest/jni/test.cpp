@@ -86,10 +86,24 @@ int main()
     err = clGetKernelInfo(testfunc, CL_KERNEL_FUNCTION_NAME, log_size, kernel_log, NULL);
     printf("function name: %s size:%d\n", kernel_log, (int)log_size);
 
+    cl_kernel addone = clCreateKernel(program, "addone", &err);
+
     cl_command_queue queue = clCreateCommandQueue(context, dev, 0, &err);
-    err = clEnqueueTask(queue, testfunc, 0, NULL, NULL);
+    err = clEnqueueTask(queue, addone, 0, NULL, NULL);
 
+    float vec[32];
+    cl_mem input_buff = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(vec), vec, &err);
+    cl_mem output_buff = clCreateBUffer(context, CL_MEM_WRITE_ONLY, sizeof(vec), NULL, &err);
 
+    clSetKernelArg(addone, 0, sizeof(cl_mem), &input_buff);
+    clSetKernelArg(addone, 1, sizeof(cl_mem), &output_buff);
+
+    cl_buffer_region region;
+    region.size = 10 * sizeof(float);
+    region.origin = 10 * sizeof(float);
+    cl_mem sub_buffer = clCreateSubBuffer(input_buff, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, CL_BUFFER_CREATE_TYPE_REGION, &region, &err);
+
+    
 
     clReleaseCommandQueue(queue);
 
