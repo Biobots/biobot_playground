@@ -89,21 +89,39 @@ int main()
     cl_kernel addone = clCreateKernel(program, "addone", &err);
 
     cl_command_queue queue = clCreateCommandQueue(context, dev, 0, &err);
-    err = clEnqueueTask(queue, addone, 0, NULL, NULL);
 
-    float vec[32];
+    float vec[32] = {0.0f};
+    float vec_ret[32] = {0.0f};
     cl_mem input_buff = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(vec), vec, &err);
-    cl_mem output_buff = clCreateBUffer(context, CL_MEM_WRITE_ONLY, sizeof(vec), NULL, &err);
+    cl_mem output_buff = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(vec), NULL, &err);
 
     clSetKernelArg(addone, 0, sizeof(cl_mem), &input_buff);
     clSetKernelArg(addone, 1, sizeof(cl_mem), &output_buff);
 
-    cl_buffer_region region;
-    region.size = 10 * sizeof(float);
-    region.origin = 10 * sizeof(float);
-    cl_mem sub_buffer = clCreateSubBuffer(input_buff, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, CL_BUFFER_CREATE_TYPE_REGION, &region, &err);
+    size_t work_size = 32;
+    clEnqueueNDRangeKernel(queue, addone, 1, NULL, &work_size, NULL, 0, NULL, NULL);
 
-    
+    err = clEnqueueReadBuffer(queue, output_buff, CL_TRUE, 0, sizeof(vec_ret), vec_ret, 0, NULL, NULL);
+
+    printf("%f\n", vec_ret[0]);
+
+    //cl_buffer_region region;
+    //region.size = 10 * sizeof(float);
+    //region.origin = 10 * sizeof(float);
+    //cl_mem sub_buffer = clCreateSubBuffer(input_buff, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, CL_BUFFER_CREATE_TYPE_REGION, &region, &err);
+
+    //float matrix[80];
+    //float rst[80];
+    //cl_mem matrix_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(matrix), matrix, &err);
+    //const size_t buffer_origin[3] = {5*sizeof(float), 3, 0};
+    //const size_t host_origin[3] = {1*sizeof(float), 1, 0};
+    //const size_t rst_region[3] = {4*sizeof(float), 4, 1};
+    //err = clSetKernelArg(addone, 0, sizeof(cl_mem), &matrix_buffer);
+    //err = clEnqueueTask(queue, addone, 0, NULL, NULL);
+    //err = clEnqueueWriteBuffer(queue, matrix_buffer, CL_TRUE, 0, sizeof(matrix), matrix, 0, NULL, NULL);
+    //err = clEnqueueReadBufferRect(queue, matrix_buffer, CL_TRUE, buffer_origin, host_origin, rst_region, 10*sizeof(float), 0, 10*sizeof(float), 0, rst, 0, NULL, NULL);
+
+
 
     clReleaseCommandQueue(queue);
 
