@@ -1,11 +1,22 @@
+#define CL_HPP_TARGET_OPENCL_VERSION 200
 #include <CL/cl.h>
+#include <CL/cl2.hpp>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <vector>
+#include <fstream>
+#include <iostream>
+
+void CL_CALLBACK kernelComplete(cl_event e, cl_int status, void* data)
+{
+    printf("ev: %f\n", ((float*)data)[0]);
+}
 
 int main()
 {
+//-------------- C HEADER ----------------
     cl_platform_id* platforms;
     cl_uint num_platforms;
     cl_int err;
@@ -101,7 +112,8 @@ int main()
     size_t work_size = 32;
     clEnqueueNDRangeKernel(queue, addone, 1, NULL, &work_size, NULL, 0, NULL, NULL);
 
-    err = clEnqueueReadBuffer(queue, output_buff, CL_TRUE, 0, sizeof(vec_ret), vec_ret, 0, NULL, NULL);
+    cl_event ev;
+    err = clEnqueueReadBuffer(queue, output_buff, CL_FALSE, 0, sizeof(vec_ret), vec_ret, 0, NULL, &ev);
 
     printf("%f\n", vec_ret[0]);
 
@@ -121,9 +133,31 @@ int main()
     //err = clEnqueueWriteBuffer(queue, matrix_buffer, CL_TRUE, 0, sizeof(matrix), matrix, 0, NULL, NULL);
     //err = clEnqueueReadBufferRect(queue, matrix_buffer, CL_TRUE, buffer_origin, host_origin, rst_region, 10*sizeof(float), 0, 10*sizeof(float), 0, rst, 0, NULL, NULL);
 
+    clSetEventCallback(ev, CL_COMPLETE, &kernelComplete, (void*)vec_ret);
 
-
+    clReleaseEvent(ev);
     clReleaseCommandQueue(queue);
 
+//----------------- CPP HEADER ------------------
+
+    std::string info;
+    std::vector<cl::Platform> p;
+    std::vector<cl::Device> d, ctxDevices;
+    cl::Platform::get(&p);
+    p[0].getInfo(CL_PLATFORM_NAME, &info);
+    printf("%s\n", info.c_str());
+    p[0].getDevices(CL_DEVICE_TYPE_ALL, &d);
+    cl::Context c(d);
+    ctxDevices = c.getInfo<CL_CONTEXT_DEVICES>();
+    for (auto &&d : ctxDevices)
+    {
+        printf("dev: %s\n", d.getInfo<CL_DEVICE_NAME>().c_str());
+    }
+    std::fstream source;
+    source.open("/data/fun.cl", std::ios::in);
+    source.seekg(0, source.end);
+    size_t srcsize = source.tellg();
+
+//----------------------------------------------
     return 0;
 }
