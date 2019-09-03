@@ -17,7 +17,7 @@ void CL_CALLBACK kernelComplete(cl_event e, cl_int status, void* data)
 int main()
 {
 //-------------- C HEADER ----------------
-    cl_platform_id* platforms;
+    /*cl_platform_id* platforms;
     cl_uint num_platforms;
     cl_int err;
     err = clGetPlatformIDs(4, NULL, &num_platforms);
@@ -75,7 +75,7 @@ int main()
     program_log = (char*) malloc(log_size + 1);
     program_log[log_size] = '\0';
 	clGetProgramInfo(program, CL_PROGRAM_SOURCE, log_size + 1, program_log, NULL);
-	printf("function result: %s\n", program_log);
+	//printf("function result: %s\n", program_log);
 	free(program_log);
 	program_log = NULL;
 
@@ -136,10 +136,14 @@ int main()
     clSetEventCallback(ev, CL_COMPLETE, &kernelComplete, (void*)vec_ret);
 
     clReleaseEvent(ev);
-    clReleaseCommandQueue(queue);
+    clReleaseCommandQueue(queue);*/
 
 //----------------- CPP HEADER ------------------
 
+    float vec[32] = {0.0f};
+    float vec_ret[32] = {0.0f};
+    size_t work_size = 32;
+    cl_int err;
     std::string info;
     std::vector<cl::Platform> p;
     std::vector<cl::Device> d, ctxDevices;
@@ -153,10 +157,28 @@ int main()
     {
         printf("dev: %s\n", d.getInfo<CL_DEVICE_NAME>().c_str());
     }
-    std::fstream source;
-    source.open("/data/fun.cl", std::ios::in);
-    source.seekg(0, source.end);
-    size_t srcsize = source.tellg();
+    std::ifstream source;
+    source.open("/data/fun.cl", std::ios::ate);
+    std::streampos srcsize = source.tellg();
+    char* strmem = new char[srcsize];
+    source.seekg(0, std::ios::beg);
+    source.read(strmem, srcsize);
+    source.close();
+    cl::Program prog(c, strmem, true);
+    delete [] strmem;
+    printf("prog: %s\n", prog.getBuildInfo<CL_PROGRAM_BUILD_LOG>()[0].second.c_str());
+    printf("src: %s\n", prog.getInfo<CL_PROGRAM_SOURCE>().c_str());
+    cl::Kernel simpleAddKernel(prog, "addone");
+    cl::Buffer inbuff(c, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(vec), vec, &err);
+    cl::Buffer outbuff(c, CL_MEM_WRITE_ONLY, sizeof(vec), NULL, &err);
+    simpleAddKernel.setArg(0, inbuff);
+    simpleAddKernel.setArg(1, outbuff);
+    cl::Event e;
+    cl::CommandQueue q(c, ctxDevices[0]);
+    q.enqueueNDRangeKernel(simpleAddKernel, 0, work_size, 1);
+    q.enqueueReadBuffer(outbuff, false, 0, sizeof(vec), vec_ret, NULL, &e);
+    e.setCallback(CL_COMPLETE, &kernelComplete, (void*)vec_ret);
+    printf("%f\n", vec_ret[0]);
 
 //----------------------------------------------
     return 0;
