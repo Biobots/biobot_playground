@@ -140,8 +140,8 @@ int main()
 
 //----------------- CPP HEADER ------------------
 
-    float vec[32] = {0.0f};
-    float vec_ret[32] = {0.0f};
+    float vec[32][4] = {0.0f};
+    float vec_ret[32][4] = {0.0f};
     size_t work_size = 32;
     cl_int err;
     std::string info;
@@ -175,10 +175,13 @@ int main()
     simpleAddKernel.setArg(1, outbuff);
     cl::Event e;
     cl::CommandQueue q(c, ctxDevices[0]);
-    q.enqueueNDRangeKernel(simpleAddKernel, 0, work_size, 1);
+    cl::NDRange offset(0, 0);
+    cl::NDRange global_size(32, 4);
+    cl::NDRange local_size(4, 2);
+    q.enqueueNDRangeKernel(simpleAddKernel, offset, global_size, local_size);
     q.enqueueReadBuffer(outbuff, false, 0, sizeof(vec), vec_ret, NULL, &e);
     e.setCallback(CL_COMPLETE, &kernelComplete, (void*)vec_ret);
-    printf("%f\n", vec_ret[0]);
+    printf("%f\n", vec_ret[0][0]);
 
 //----------------------------------------------
     return 0;
