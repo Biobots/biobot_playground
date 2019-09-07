@@ -14,4 +14,5 @@ work/defog/main.exe
 work/guide_filter/main.exe
 work/cltest/libs
 work/cltest/obj
+work/cltest/win/build
 trash/cpp/build
