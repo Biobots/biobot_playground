@@ -37,7 +37,7 @@ template<class ...T> struct common_type;
 template<class T>
 struct common_type<T>
 {
-    //std::decay返回退化后的基本类型
+    //std::decay返回退化后的基�?类型
     typedef typename std::decay<T>::type type;
 };
 
@@ -72,9 +72,22 @@ struct B {
 
 };
 
+template<typename F, typename T1, typename T2>
+auto flip(F f, T1 &&t1, T2 &&t2) -> decltype(f(std::declval<T1>(), std::declval<T2>()))
+{
+    return f(std::forward<T2>(t2), std::forward<T1>(t1));
+}
+
+int testFunc(int a, int b)
+{
+    std::cout << a << b << std::endl;
+    return a - b;
+}
+
 int main()
 {
     std::cout << has_to_string<A>::value << std::endl;
     std::cout << has_to_string<B>::value << std::endl;
+    std::cout << flip(testFunc, 10, 2) << std::endl;
 	return 0;
 }
